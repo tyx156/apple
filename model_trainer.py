@@ -188,12 +188,12 @@ def generate_feature_importance(model, vectorizer, save_path):
         
         # 生成图表
         plt.figure(figsize=(12, 8))
-        plt.title('Top 20 Feature Importance')
+        plt.title('前20个重要特征 (Top 20 Feature Importance)')
         plt.barh(range(len(importances)), importances, align='center')
         plt.yticks(range(len(importances)), feature_names)
-        plt.xlabel('Importance')
+        plt.xlabel('重要性 (Importance)')
         plt.tight_layout()
-        plt.savefig(os.path.join(save_path, 'feature_importance.png'))
+        plt.savefig(os.path.join(save_path, 'feature_importance.png'), dpi=150, bbox_inches='tight')
         plt.close()
     except Exception as e:
         print(f"生成特征重要性图表失败: {e}")
