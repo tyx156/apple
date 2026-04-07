@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水军评论识别系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h3">水军评论识别系统</h1>
+                        <p class="mb-0">基于机器学习的评论分析工具</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- 模型状态 -->
+                        <div class="alert {% if model_loaded %}alert-success{% else %}alert-warning{% endif %} mb-4">
+                            <strong>模型状态:</strong> {% if model_loaded %}已加载{% else %}未加载，请先训练模型{% endif %}
+                        </div>
+
+                        <!-- 单个评论预测 -->
+                        <div class="mb-5">
+                            <h2 class="h4 mb-3">单个评论分析</h2>
+                            <form id="predict-form">
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">评论内容</label>
+                                    <textarea class="form-control" id="comment" rows="3" placeholder="请输入评论内容..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">分析评论</button>
+                            </form>
+                            <div id="predict-result" class="mt-3"></div>
+                        </div>
+
+                        <!-- 店铺网址分析 -->
+                        <div class="mb-5">
+                            <h2 class="h4 mb-3">店铺网址分析</h2>
+                            <p class="text-muted mb-3">系统将尝试采集公开评论；若页面需要验证，请上传CSV分析。</p>
+                            <form id="url-form">
+                                <div class="mb-3">
+                                    <label for="shop-url" class="form-label">大众点评店铺或评论页网址</label>
+                                    <input type="url" class="form-control" id="shop-url" placeholder="https://www.dianping.com/...">
+                                </div>
+                                <button type="submit" class="btn btn-primary">分析店铺水军率</button>
+                            </form>
+                            <div id="url-result" class="mt-3"></div>
+                        </div>
+
+                        <!-- 批量文件上传 -->
+                        <div class="mb-5">
+                            <h2 class="h4 mb-3">批量文件分析</h2>
+                            <p class="text-muted mb-3">当网址无法自动采集时，请上传包含"cus_comment"或"comment"列的CSV文件。</p>
+                            <form id="upload-form" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="file" class="form-label">上传CSV文件</label>
+                                    <input type="file" class="form-control" id="file" name="file" accept=".csv">
+                                    <small class="form-text text-muted">请确保文件包含"cus_comment"或"comment"列</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">批量分析CSV</button>
+                            </form>
+                            <div id="upload-result" class="mt-3"></div>
+                        </div>
+
+                        <!-- 模型训练 -->
+                        <div class="mb-5">
+                            <h2 class="h4 mb-3">模型训练</h2>
+                            <p class="text-muted mb-3">点击下方按钮开始训练模型，训练过程可能需要几分钟时间</p>
+                            <button id="train-btn" class="btn btn-success">开始训练模型</button>
+                            <div id="train-result" class="mt-3"></div>
+                        </div>
+
+                        <!-- 可视化结果 -->
+                        <div class="mb-5">
+                            <h2 class="h4 mb-3">可视化结果</h2>
+                            <div class="text-center mb-3">
+                                <button id="load-visualizations" class="btn btn-info">加载可视化结果</button>
+                            </div>
+                            <div id="visualization-container" class="mt-3"></div>
+                        </div>
+
+                        <!-- 系统说明 -->
+                        <div class="mt-5 p-4 bg-light rounded">
+                            <h2 class="h4 mb-3">系统说明</h2>
+                            <ul class="list-unstyled">
+                                <li>• 支持分析大众点评、豆瓣等平台的餐饮、演出类评论</li>
+                                <li>• 使用TF-IDF特征提取和机器学习算法进行识别</li>
+                                <li>• 支持逻辑回归和LightGBM两种算法</li>
+                                <li>• 可尝试从公开页面采集评论，遇到验证时支持CSV上传分析</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center text-muted">
+                        <p>&copy; 2026 水军评论识别系统</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
