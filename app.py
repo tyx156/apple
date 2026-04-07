@@ -41,7 +41,7 @@ def comment_to_tokens(comment):
     tokens = list(jieba.cut(clean_comment))
     return ' '.join(tokens)
 
-def predict_comments(comments, preview_limit=200):
+def predict_comments(comments, preview_limit=20):
     """批量预测评论，并返回整体统计和前若干条明细"""
     if not ensure_model_loaded():
         raise ValueError('模型未加载，请先训练模型')

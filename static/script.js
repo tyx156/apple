@@ -9,48 +9,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderBatchResult(data) {
-        const ratio = (data.water_army_ratio * 100).toFixed(2);
-        const rows = data.results.map(item => {
-            const probability = (item.probability * 100).toFixed(2);
-            const badgeClass = item.result === '水军评论' ? 'bg-danger' : 'bg-success';
-            return `
-                <tr>
-                    <td>${item.index}</td>
-                    <td>${escapeHtml(item.comment)}</td>
-                    <td><span class="badge ${badgeClass}">${item.result}</span></td>
-                    <td>${probability}%</td>
-                </tr>
-            `;
-        }).join('');
-
-        const previewTip = data.total_comments > data.preview_limit
-            ? `<p class="text-muted mb-0">仅展示前${data.preview_limit}条明细，统计结果基于全部评论。</p>`
-            : '';
-
+    const ratio = (data.water_army_ratio * 100).toFixed(2);
+    const rows = data.results.map(item => {
+        const probability = (item.probability * 100).toFixed(2);
+        const badgeClass = item.result === '水军评论' ? 'bg-danger' : 'bg-success';
         return `
-            <div class="alert alert-info">
-                <h5>${data.message || '分析完成'}</h5>
-                <p><strong>总评论数:</strong> ${data.total_comments}</p>
-                <p><strong>疑似水军评论:</strong> ${data.water_army_count}</p>
-                <p><strong>真实评论:</strong> ${data.real_comment_count}</p>
-                <p><strong>疑似水军率:</strong> ${ratio}%</p>
-                ${previewTip}
-            </div>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered align-middle">
-                    <thead>
-                        <tr>
-                            <th>序号</th>
-                            <th>评论内容</th>
-                            <th>识别结果</th>
-                            <th>置信度</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>
+            <tr>
+                <td>${item.index}</td>
+                <td>${escapeHtml(item.comment)}</td>
+                <td><span class="badge ${badgeClass}">${item.result}</span></td>
+                <td>${probability}%</td>
+            </tr>
         `;
+    }).join('');
+
+    const previewTip = data.total_comments > data.preview_limit
+        ? `<p class="text-muted mb-0">仅展示前${data.preview_limit}条明细，统计结果基于全部评论。</p>`
+        : '';
+
+    // 更新饼图数据
+    if (typeof updatePieChart === 'function') {
+        updatePieChart(data.water_army_count, data.real_comment_count);
     }
+
+    return `
+        <div class="alert alert-info">
+            <h5>${data.message || '分析完成'}</h5>
+            <p><strong>总评论数:</strong> ${data.total_comments}</p>
+            <p><strong>疑似水军评论:</strong> ${data.water_army_count}</p>
+            <p><strong>真实评论:</strong> ${data.real_comment_count}</p>
+            <p><strong>疑似水军率:</strong> ${ratio}%</p>
+            ${previewTip}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>评论内容</th>
+                        <th>识别结果</th>
+                        <th>置信度</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
 
     // 单个评论预测
     const predictForm = document.getElementById('predict-form');
@@ -222,40 +227,152 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 visualizationContainer.innerHTML = '';
                 
+                // 创建饼图容器
+                const pieChartCard = document.createElement('div');
+                pieChartCard.className = 'card mb-4';
+                pieChartCard.innerHTML = `
+                    <div class="card-header">
+                        <h5 class="card-title">水军评论与真实评论分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <canvas id="commentDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                visualizationContainer.appendChild(pieChartCard);
+                
                 // 为每种可视化结果创建卡片
                 data.forEach(visualization => {
-                    const card = document.createElement('div');
-                    card.className = 'card mb-3';
-                    
-                    // 根据文件名生成标题
-                    let title = '可视化结果';
+                    // 只显示水军词云
                     if (visualization.name.includes('water_army_wordcloud')) {
-                        title = '水军评论词云';
-                    } else if (visualization.name.includes('real_wordcloud')) {
-                        title = '真实评论词云';
+                        const card = document.createElement('div');
+                        card.className = 'card mb-3';
+                        
+                        let title = '水军评论词云';
+                        
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <h5 class="card-title">${title}</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <img src="${visualization.url}" class="img-fluid rounded" alt="${title}">
+                            </div>
+                        `;
+                        
+                        visualizationContainer.appendChild(card);
                     } else if (visualization.name.includes('feature_importance')) {
-                        title = '特征重要性';
-                    } else if (visualization.name.includes('confusion_matrix')) {
-                        title = '混淆矩阵';
-                    } else if (visualization.name.includes('accuracy')) {
-                        title = '模型准确率';
+                        const card = document.createElement('div');
+                        card.className = 'card mb-3';
+                        
+                        let title = '特征重要性';
+                        
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <h5 class="card-title">${title}</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="mb-2"><small class="text-muted">特征重要性图表展示了模型中各个特征的重要程度</small></div>
+                                <img src="${visualization.url}" class="img-fluid rounded" alt="${title}">
+                            </div>
+                        `;
+                        
+                        visualizationContainer.appendChild(card);
                     }
-                    
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <h5 class="card-title">${title}</h5>
-                        </div>
-                        <div class="card-body text-center">
-                            <img src="${visualization.url}" class="img-fluid rounded" alt="${title}">
-                        </div>
-                    `;
-                    
-                    visualizationContainer.appendChild(card);
                 });
+                
+                // 初始化饼图
+                initPieChart();
             })
             .catch(error => {
                 visualizationContainer.innerHTML = '<div class="alert alert-danger">加载失败，请稍后重试</div>';
                 console.error('Error:', error);
             });
     });
+    
+    // 全局饼图实例
+    let pieChart = null;
+    
+    // 初始化饼图
+    function initPieChart(data = null) {
+        const ctx = document.getElementById('commentDistributionChart').getContext('2d');
+        
+        // 默认数据或传入的数据
+        const chartData = data || {
+            labels: ['水军评论', '真实评论'],
+            datasets: [{
+                data: [35, 65], // 这里应该是真实的比例数据
+                backgroundColor: [
+                    '#a0b4c8', // 灰蓝色
+                    '#d8b4c8'  // 灰粉色
+                ],
+                borderColor: [
+                    '#a0b4c8',
+                    '#d8b4c8'
+                ],
+                borderWidth: 1
+            }]
+        };
+        
+        // 配置选项
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        };
+        
+        // 如果饼图已存在，更新数据
+        if (pieChart) {
+            pieChart.data = chartData;
+            pieChart.update();
+        } else {
+            // 创建饼图
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: chartData,
+                options: options
+            });
+        }
+    }
+    
+    // 更新饼图数据
+    function updatePieChart(waterArmyCount, realCommentCount) {
+        const data = {
+            labels: ['水军评论', '真实评论'],
+            datasets: [{
+                data: [waterArmyCount, realCommentCount],
+                backgroundColor: [
+                    '#a0b4c8', // 灰蓝色
+                    '#d8b4c8'  // 灰粉色
+                ],
+                borderColor: [
+                    '#a0b4c8',
+                    '#d8b4c8'
+                ],
+                borderWidth: 1
+            }]
+        };
+        initPieChart(data);
+    }
 });

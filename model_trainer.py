@@ -170,6 +170,12 @@ def generate_feature_importance(model, vectorizer, save_path):
     os.makedirs(save_path, exist_ok=True)
     
     try:
+        # 获取中文字体路径
+        font_path = get_chinese_font_path()
+        if font_path:
+            plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置中文字体
+            plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+        
         # 获取特征重要性
         if hasattr(model, 'feature_importances_'):
             importances = model.feature_importances_
@@ -204,6 +210,12 @@ def generate_model_performance(y_test, y_pred, save_path):
     os.makedirs(save_path, exist_ok=True)
     
     try:
+        # 获取中文字体路径
+        font_path = get_chinese_font_path()
+        if font_path:
+            plt.rcParams['font.sans-serif'] = ['SimHei']  # 设置中文字体
+            plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+        
         # 计算性能指标
         accuracy = accuracy_score(y_test, y_pred)
         cm = confusion_matrix(y_test, y_pred)
@@ -211,11 +223,11 @@ def generate_model_performance(y_test, y_pred, save_path):
         # 生成混淆矩阵图表
         plt.figure(figsize=(8, 6))
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title('Confusion Matrix')
+        plt.title('混淆矩阵 (Confusion Matrix)')
         plt.colorbar()
         tick_marks = [0, 1]
-        plt.xticks(tick_marks, ['Real', 'Water Army'])
-        plt.yticks(tick_marks, ['Real', 'Water Army'])
+        plt.xticks(tick_marks, ['真实评论', '水军评论'])
+        plt.yticks(tick_marks, ['真实评论', '水军评论'])
         
         # 添加数值标签
         for i in range(2):
@@ -223,17 +235,17 @@ def generate_model_performance(y_test, y_pred, save_path):
                 plt.text(j, i, cm[i, j], ha='center', va='center')
         
         plt.tight_layout()
-        plt.ylabel('True label')
-        plt.xlabel('Predicted label')
+        plt.ylabel('真实标签')
+        plt.xlabel('预测标签')
         plt.savefig(os.path.join(save_path, 'confusion_matrix.png'))
         plt.close()
         
         # 生成准确率图表
         plt.figure(figsize=(8, 6))
-        plt.bar(['Accuracy'], [accuracy])
-        plt.title('Model Accuracy')
+        plt.bar(['准确率'], [accuracy])
+        plt.title('模型准确率 (Model Accuracy)')
         plt.ylim(0, 1)
-        plt.ylabel('Accuracy')
+        plt.ylabel('准确率')
         plt.text(0, accuracy + 0.02, f'{accuracy:.4f}', ha='center')
         plt.tight_layout()
         plt.savefig(os.path.join(save_path, 'accuracy.png'))

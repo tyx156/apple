@@ -1,66 +1,129 @@
 body {
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
     font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
 }
 
 .card {
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .card-header {
     font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
 }
 
 .form-control {
-    border-radius: 5px;
+    border-radius: 8px;
     border: 1px solid #ced4da;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
 }
 
 .form-control:focus {
-    border-color: #80bdff;
+    border-color: #667eea;
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-1px);
 }
 
 .btn {
-    border-radius: 5px;
+    border-radius: 8px;
     font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
 }
 
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
 }
 
 .btn-primary:hover {
-    background-color: #0069d9;
-    border-color: #0062cc;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    border-color: #764ba2;
+    transform: translateY(-2px);
 }
 
 .btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-color: #f093fb;
 }
 
 .btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    border-color: #f5576c;
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-color: #4facfe;
+    color: white;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    border-color: #00f2fe;
+    transform: translateY(-2px);
 }
 
 .alert {
-    border-radius: 5px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.alert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 #predict-result, #url-result, #upload-result, #train-result {
-    border-radius: 5px;
+    border-radius: 8px;
     padding: 15px;
     margin-top: 10px;
+    transition: all 0.3s ease;
 }
 
 .table td {
     word-break: break-word;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+    min-width: 100px;
+    text-align: center;
+}
+
+.text-sm {
+    font-size: 0.875rem;
 }
 
 .result-success {
@@ -95,6 +158,28 @@ body {
     to { transform: rotate(360deg); }
 }
 
+/* 饼图容器样式 */
+#commentDistributionChart {
+    height: 300px !important;
+    width: 100% !important;
+}
+
+/* 可视化卡片样式 */
+.card-body {
+    position: relative;
+}
+
+.card-body img {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.card-body img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
     .container {
         padding: 0 15px;
@@ -104,4 +189,41 @@ body {
         margin: 0 -15px;
         border-radius: 0;
     }
+    
+    #commentDistributionChart {
+        height: 250px !important;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 加载动画 */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    border-top-color: #667eea;
+    animation: spin 1s ease-in-out infinite;
 }
